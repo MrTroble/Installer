@@ -32,13 +32,15 @@ namespace WindowsFormsApplication1
         {
             Console.WriteLine("Start Programm");
             Rectangle b = Screen.FromControl(this).Bounds;
-            SetDesktopLocation((b.Width/2 - Bounds.Width/2), (b.Height / 2 - Bounds.Height / 2));
+            SetBounds((b.Width/2 - 250), (b.Height / 2 - 200),500,400);
 
             Label lab = new Label();
             lab.Text = "Welcome to TAS\nInstaller";
             lab.Font = MainFont;
-            lab.SetBounds(((Bounds.Width/2) - 100), ((Bounds.Height/2) - 125), 220, 50);
-
+            lab.SetBounds(((Bounds.Width/2) - 100), ((Bounds.Height/2) - 125), 220, 60);
+            lab.BorderStyle = BorderStyle.None;
+            lab.TextAlign = ContentAlignment.MiddleCenter;
+            lab.BackColor = Color.FromKnownColor(KnownColor.Transparent);
 
             Button next = new Button();
             next.Text = "Next";
@@ -50,6 +52,7 @@ namespace WindowsFormsApplication1
             Controls.Add(next);
             Controls.Add(lab);
             cancelButton();
+            BackGround();
         }
 
 
@@ -78,6 +81,7 @@ namespace WindowsFormsApplication1
             Controls.Add(box);
 
             cancelButton();
+            BackGround();
             btn.Focus();
         }
 
@@ -90,6 +94,8 @@ namespace WindowsFormsApplication1
             names = box.Lines;
             clear();
 
+            BackGround();
+
             FolderBrowserDialog fld = new FolderBrowserDialog();
             if(fld.ShowDialog() == DialogResult.OK)
             {
@@ -100,13 +106,15 @@ namespace WindowsFormsApplication1
                 Canc_Click(sender, e);
                 if(Visible) Btn_Click(sender, e);
             }
+
+
         }
 
         private void clear()
         {
-            for (int i = 0; i < Controls.Count; i++)
+            foreach(Control cl in Controls)
             {
-                Controls[i].Visible = false;
+                cl.Visible = false;
             }
         }
 
@@ -117,12 +125,28 @@ namespace WindowsFormsApplication1
 
         public void buttonBuild(Button next)
         {
-            next.BackgroundImage = Image.FromFile(get("Button.png"));
+            next.BackColor = Color.White;
             next.Font = MainFont;
             next.SetBounds((Bounds.Width - 82), (Bounds.Height - 42), 80, 40);
             next.FlatStyle = FlatStyle.Flat;
             next.FlatAppearance.BorderColor = Color.Black;
             next.FlatAppearance.BorderSize = 0;
+        }
+
+        private void BackGround()
+        {
+            Label labd = new Label();
+            labd.SetBounds(0,0,Bounds.Width,Bounds.Height);
+            labd.Image = Image.FromFile(get("Back.png"));
+            Controls.Add(labd);
+
+            foreach(Control l in Controls)
+            {
+                if (l is Label && l != labd) {
+                    l.Parent = labd;
+                    l.BackColor = Color.Transparent;
+                }
+            }
         }
 
         public void cancelButton()
@@ -132,10 +156,10 @@ namespace WindowsFormsApplication1
             buttonBuild(canc);
             canc.Click += Canc_Click;
             canc.BackColor = Color.White;
-            canc.SetBounds(5, (Bounds.Height - 42), 100, 40);
+            canc.SetBounds(2, (Bounds.Height - 42), 100, 40);
+            CancelButton = canc;
 
             Controls.Add(canc);
-            CancelButton = canc;
         }
 
         private void Canc_Click(object sender, EventArgs e)
