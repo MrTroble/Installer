@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace WindowsFormsApplication1
+namespace TAS_Installer
 {
     static class Program
     {
@@ -14,8 +14,10 @@ namespace WindowsFormsApplication1
         [STAThread]
         static void Main()
         {
+            Console.WriteLine("Start Main");
             Application.EnableVisualStyles();
-            Application.SetCompatibleTextRenderingDefault(true);
+            Application.SetCompatibleTextRenderingDefault(false);
+            Console.WriteLine("Load Form");
             Application.Run(new TAS());
         }
     }

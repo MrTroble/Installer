@@ -1,4 +1,4 @@
-﻿namespace WindowsFormsApplication1
+﻿namespace TAS_Installer
 {
     partial class TAS
     {
@@ -37,10 +37,12 @@
             this.AccessibleRole = System.Windows.Forms.AccessibleRole.TitleBar;
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.White;
-            this.DataBindings.Add(new System.Windows.Forms.Binding("Text", global::WindowsFormsApplication1.Properties.Settings.Default, "tas_ins", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
+            this.DataBindings.Add(new System.Windows.Forms.Binding("Text", global::TAS_Installer.Properties.Settings.Default, "tas_ins", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
+            this.DataBindings.Add(new System.Windows.Forms.Binding("Location", global::TAS_Installer.Properties.Settings.Default, "size", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
+            this.Location = global::TAS_Installer.Properties.Settings.Default.size;
             this.Name = "TAS";
             this.ShowIcon = false;
-            this.Text = global::WindowsFormsApplication1.Properties.Settings.Default.tas_ins;
+            this.Text = global::TAS_Installer.Properties.Settings.Default.tas_ins;
             this.Load += new System.EventHandler(this.TAS_Load);
             this.ResumeLayout(false);
 
