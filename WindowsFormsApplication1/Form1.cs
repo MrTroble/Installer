@@ -129,7 +129,7 @@ namespace TAS_Installer
             box = new TextBox();
             box.Multiline = true;
             box.AcceptsReturn = true;
-            box.Lines = new string[] { "Write the names down", "only one name for each line" };
+            box.Lines = new string[] { "Write the names down,", "only one name for each line." };
             box.SetBounds(2, 2, Bounds.Width - 4, Bounds.Height - 100);
             box.Font = MainFont;
 
@@ -151,6 +151,7 @@ namespace TAS_Installer
             Controls.Add(back);
 
             cancelButton();
+            step(1);
             BackGround();
             btn.Focus();
         }
@@ -178,29 +179,217 @@ namespace TAS_Installer
             back.Click += Back2_Click;
             back.SetBounds((Bounds.Width - 164), (Bounds.Height - 42), 80, 40);
 
+            bx = new TextBox();
+            bx.Text = "C:\\Program Files\\TAS";
+            bx.Font = MainFont;
+            bx.Multiline = true;
+            bx.SetBounds((Bounds.Width/2 - 155), (Bounds.Height/2 - 20), 250, 40);
+            bx.BorderStyle = BorderStyle.None;
+
             Button DDD = new Button();
             DDD.Text = "...";
             buttonBuild(DDD);
             DDD.Click += DDD_Click;
+            DDD.SetBounds((Bounds.Width/2 + 97), (Bounds.Height/2 - 20), 60, 40);
 
             Button btn = new Button();
             btn.Text = "Next";
-            btn.Click += Btn_Click;
+            btn.Click += Next3_Click;
             buttonBuild(btn);
 
-            bx = new TextBox();
-            bx.Text = "C:\\Program Files\\TAS";
-            bx.Font = MainFont;
+            Label lab = new Label();
+            lab.Text = "Choose Install Location";
+            lab.Font = MainFont;
+            lab.TextAlign = ContentAlignment.MiddleCenter;
+            lab.SetBounds((Bounds.Width/2 - 175), (Bounds.Height / 2 - 60), 350, 40);
 
             Controls.Add(btn);
             Controls.Add(DDD);
             Controls.Add(back);
             Controls.Add(bx);
+            Controls.Add(lab);
+
+            cancelButton();
+            step(2);
+
+            BackGround();
+        }
+
+        private void step(int i)
+        {
+            Label stp = new Label();
+            stp.Text = "Step " + i + "/3";
+            stp.ForeColor = Color.White;
+            stp.TextAlign = ContentAlignment.MiddleCenter;
+            stp.Font = MainFont;
+            stp.SetBounds((122),(Bounds.Height - 42),200,40);
+
+            Controls.Add(stp);
+        }
+
+        Label p1 = new Label(), p2 = new Label(),p3 = new Label();
+        Timer tm1 = new Timer(),tm2 = new Timer(),tm3 = new Timer();
+        Timer tm12 = new Timer(), tm22 = new Timer(), tm32 = new Timer();
+
+        private void Next3_Click(object sender, EventArgs e)
+        {
+            clear();
+            Console.WriteLine("Next-->3");
+
+            tm1.Tick += Tm1_Tick;
+            tm2.Tick += Tm2_Tick;
+            tm3.Tick += Tm3_Tick;
+
+            tm12.Tick += Tm12_Tick;
+            tm22.Tick += Tm22_Tick;
+            tm32.Tick += Tm32_Tick;
+
+            foreach (Timer l in new Timer[] { tm1, tm2, tm3 })
+            {
+                l.Interval = 1;
+                l.Start();
+            }
+
+            foreach (Timer l in new Timer[] { tm12, tm22, tm32 })
+            {
+                l.Interval = 1;
+            }
+
+            Label pw = new Label();
+            pw.Font = MainFont;
+            pw.Text = "Please Wait";
+            pw.TextAlign = ContentAlignment.MiddleCenter;
+            pw.SetBounds((Bounds.Width/2 - 90), (Bounds.Height/2 - 60), 180, 40);
+
+            Button btn = new Button();
+            btn.Text = "Finish";
+            btn.Click += Fin_Click;
+            buttonBuild(btn);
+            btn.Enabled = false;
+            btn.SetBounds((Bounds.Width - 102), (Bounds.Height - 42), 100, 40);
+
+            Controls.Add(btn);
 
             cancelButton();
 
-            BackGround();
+            step(3);
 
+            foreach (Label l in new Label[] { p1, p2, p3 })
+            {
+                l.Font = MainFont;
+                l.Text = ".";
+                l.TextAlign = ContentAlignment.MiddleCenter;
+                l.BackColor = Color.Transparent;
+            }
+
+            Controls.Add(p3);
+            Controls.Add(p2);
+            Controls.Add(p1);
+            Controls.Add(pw);
+
+            Label lsb = BackGround();
+            p1.Parent = lsb;
+            p2.Parent = lsb;
+            p3.Parent = lsb;
+
+            System.Threading.ThreadStart threadDelegate = new System.Threading.ThreadStart(Work.DoWork);
+            System.Threading.Thread newThread = new System.Threading.Thread(threadDelegate);
+            newThread.Start();
+        }
+
+        private void Tm32_Tick(object sender, EventArgs e)
+        {
+            if (ts3 <= -(Bounds.Width + 20))
+            {
+                tm32.Stop();
+                ts3 = 5;
+                ts2 = 5;
+                ts1 = 5;
+                foreach (Timer l in new Timer[] { tm1, tm2, tm3 })
+                {
+                    l.Start();
+                }
+                return;
+            }
+            p3.SetBounds(Bounds.Width + ts3, (Bounds.Height / 2 - 20), 20, 40);
+            ts3 -= 2;
+        }
+
+        private void Tm22_Tick(object sender, EventArgs e)
+        {
+            if (ts2 <= -(Bounds.Width + 20))
+            {
+                tm22.Stop();
+                return;
+            }
+            p2.SetBounds(Bounds.Width + ts2, (Bounds.Height / 2 - 20), 20, 40);
+            ts2 -= 3;
+        }
+
+        private void Tm12_Tick(object sender, EventArgs e)
+        {
+            if (ts1 <= -(Bounds.Width + 20))
+            {
+                tm12.Stop();
+                return;
+            }
+            p1.SetBounds(Bounds.Width + ts1, (Bounds.Height / 2 - 20), 20, 40);
+            ts1 -= 4;
+        }
+
+        private int ts1 = 5, ts2 = 5, ts3 = 5;
+
+        private void Tm3_Tick(object sender, EventArgs e)
+        {
+            if (ts3 <= -((Bounds.Width / 2) - 20))
+            {
+                tm3.Stop();
+                foreach (Timer l in new Timer[] {tm12, tm22, tm32 })
+                {
+                    l.Start();
+                }
+                return;
+            }
+            p3.SetBounds(Bounds.Width + ts3, (Bounds.Height / 2 - 20), 20, 40);
+            ts3 -= 1;
+        }
+
+        private void Tm2_Tick(object sender, EventArgs e)
+        {
+            if (ts2 <= -((Bounds.Width / 2)))
+            {
+                tm2.Stop();
+                return;
+            }
+            p2.SetBounds(Bounds.Width + ts2, (Bounds.Height / 2 - 20), 20, 40);
+            ts2 -= 2;
+        }
+
+        private void Tm1_Tick(object sender, EventArgs e)
+        {
+            if (ts1 <= -((Bounds.Width / 2) + 20))
+            {
+                tm1.Stop();
+                return;
+            }
+            p1.SetBounds(Bounds.Width + ts1, (Bounds.Height / 2 - 20), 20, 40);
+            ts1 -= 3;
+        }
+
+        private void Fin_Click(object sender, EventArgs e)
+        {
+            Close();
+            Application.Exit();
+        }
+
+        private void CreateShortcut(string shortcutPath, string shortcutDest)
+        {
+            StreamWriter sw = new StreamWriter(shortcutPath);
+            sw.WriteLine("[InternetShortcut]");
+            sw.WriteLine("URL=file:///" + shortcutDest);
+            sw.WriteLine("IconIndex=0");
+            sw.WriteLine("IconFile=" + shortcutDest);
+            sw.Close();
         }
 
         private void Back2_Click(object sender, EventArgs e)
@@ -221,12 +410,12 @@ namespace TAS_Installer
             if (fld.ShowDialog() == DialogResult.OK)
             {
                 folderName = fld.SelectedPath;
-                bx.Text = folderName + "\\TAS";
-            }
-            else
-            {
-                Canc_Click(sender, e);
-                if (Visible) Btn_Click(sender, e);
+                if(folderName.Last() == '\\')
+                {
+                    folderName = folderName.Remove(folderName.Length - 1,1);
+                }
+                bx.Text = folderName + @"\TAS";
+                folderName = bx.Text;
             }
         }
 
@@ -248,11 +437,11 @@ namespace TAS_Installer
             next.FlatAppearance.BorderSize = 0;
         }
 
-        private void BackGround()
+        private Label BackGround()
         {
             Label labd = new Label();
             labd.SetBounds(0,0,Bounds.Width,Bounds.Height);
-            labd.Image = Properties.Resources.Back;
+            labd.Image = Image.FromStream(getStream("Resources.Back.png"));
             Controls.Add(labd);
 
             foreach(Control l in Controls)
@@ -262,6 +451,7 @@ namespace TAS_Installer
                     l.BackColor = Color.Transparent;
                 }
             }
+            return labd;
         }
 
         public void cancelButton()
@@ -280,6 +470,16 @@ namespace TAS_Installer
         private void Canc_Click(object sender, EventArgs e)
         {
             if (MessageBox.Show("Do you really want to cancel the setup?", "Cancel?", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes) Close();
+        }
+    }
+
+    class Work
+    {
+        Work() { }
+
+        public static void DoWork()
+        {
+
         }
     }
 }
