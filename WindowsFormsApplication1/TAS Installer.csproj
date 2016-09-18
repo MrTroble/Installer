@@ -102,6 +102,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Util.cs" />
+    <Compile Include="Work.cs" />
+    <Compile Include="InstallThread.cs" />
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -142,9 +145,6 @@
     <EmbeddedResource Include="Resources\CONSOLAB.TTF">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>
-    <None Include="TAS Installer_TemporaryKey.pfx" />
-    <None Include="TAS Installer_TemporaryKey.pre" />
-    <None Include="WindowsFormsApplication1_TemporaryKey.pfx" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.5.2">

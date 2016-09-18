@@ -1,17 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
-using System.Drawing.Text;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
-using System.IO;
-using System.Reflection;
-using System.Collections;
-using System.Runtime.InteropServices;
 
 namespace TAS_Installer
 {
@@ -19,47 +9,22 @@ namespace TAS_Installer
     {
         public static Font MainFont;
         public static Rectangle b = new Rectangle();
+        public static string NSP = "TAS_Installer.Resources.";
 
         public TAS()
         {
             b = Screen.FromControl(this).Bounds;
             InitializeComponent();
-            Stream s = getStream("Resources.CONSOLAB.TTF");
-            byte[] ba = new byte[s.Length];
-            int i = 0;
-            foreach (int iss in ba)
-            {
-                ba[i] = (byte)s.ReadByte();
-                i++;
-            }
-            PrivateFontCollection vcol = new PrivateFontCollection();
-            FontFamily collection = LoadFontFamily(ba, out vcol);
-            MainFont = new Font(collection,18F);
+            MainFont = Util.LoadFont(NSP + "CONSOLAB.TTF", 18F);
             FormBorderStyle = FormBorderStyle.None;
         }
 
         private Label lab;
         private Button next;
 
-        public static FontFamily LoadFontFamily(byte[] buffer, out PrivateFontCollection fontCollection)
-        {
-            var handle = GCHandle.Alloc(buffer, GCHandleType.Pinned);
-            try
-            {
-                     var ptr = Marshal.UnsafeAddrOfPinnedArrayElement(buffer, 0);
-                     fontCollection = new PrivateFontCollection();
-                     fontCollection.AddMemoryFont(ptr, buffer.Length);
-                     return fontCollection.Families[0];
-            }
-            finally
-            {
-            handle.Free();
-            }
-        }
-
         private void TAS_Load(object sender, EventArgs e)
         {
-            this.Icon = new Icon(getStream("back2 (1).ico"));
+            this.Icon = new Icon(Util.getStream("TAS_Installer.back2 (1).ico"));
             ShowIcon = true;
             Console.WriteLine("Start Programm");
             SetBounds((b.Width / 2 - 250), (b.Height / 2 - 200), 500, 400);
@@ -70,7 +35,7 @@ namespace TAS_Installer
             lab.SetBounds(((Bounds.Width / 2) + i), ((Bounds.Height / 2) - 125), 220, 60);
             lab.BorderStyle = BorderStyle.None;
             lab.TextAlign = ContentAlignment.MiddleCenter;
-            lab.BackColor = Color.FromKnownColor(KnownColor.Transparent);
+            lab.BackColor = Color.Transparent;
 
             Timer t = new Timer();
             t.Interval = 20;
@@ -149,7 +114,7 @@ namespace TAS_Installer
             Controls.Add(btn);
             Controls.Add(box);
             Controls.Add(back);
-
+            
             cancelButton();
             step(1);
             BackGround();
@@ -227,9 +192,11 @@ namespace TAS_Installer
             Controls.Add(stp);
         }
 
-        Label p1 = new Label(), p2 = new Label(),p3 = new Label();
-        Timer tm1 = new Timer(),tm2 = new Timer(),tm3 = new Timer();
-        Timer tm12 = new Timer(), tm22 = new Timer(), tm32 = new Timer();
+        public static Label p1 = new Label(), p2 = new Label(),p3 = new Label();
+        public static Timer tm1 = new Timer(),tm2 = new Timer(),tm3 = new Timer();
+        public static Timer tm12 = new Timer(), tm22 = new Timer(), tm32 = new Timer();
+        public static Label pw = new Label();
+        public static Button fn;
 
         private void Next3_Click(object sender, EventArgs e)
         {
@@ -255,20 +222,19 @@ namespace TAS_Installer
                 l.Interval = 1;
             }
 
-            Label pw = new Label();
             pw.Font = MainFont;
             pw.Text = "Please Wait";
             pw.TextAlign = ContentAlignment.MiddleCenter;
-            pw.SetBounds((Bounds.Width/2 - 90), (Bounds.Height/2 - 60), 180, 40);
+            pw.SetBounds((Bounds.Width / 2 - 90), (Bounds.Height / 2 - 60), 180, 40);
 
-            Button btn = new Button();
-            btn.Text = "Finish";
-            btn.Click += Fin_Click;
-            buttonBuild(btn);
-            btn.Enabled = false;
-            btn.SetBounds((Bounds.Width - 102), (Bounds.Height - 42), 100, 40);
+            fn = new Button();
+            fn.Text = "Finish";
+            fn.Click += Fin_Click;
+            buttonBuild(fn);
+            fn.Enabled = false;
+            fn.SetBounds((Bounds.Width - 102), (Bounds.Height - 42), 100, 40);
 
-            Controls.Add(btn);
+            Controls.Add(fn);
 
             cancelButton();
 
@@ -292,9 +258,7 @@ namespace TAS_Installer
             p2.Parent = lsb;
             p3.Parent = lsb;
 
-            System.Threading.ThreadStart threadDelegate = new System.Threading.ThreadStart(Work.DoWork);
-            System.Threading.Thread newThread = new System.Threading.Thread(threadDelegate);
-            newThread.Start();
+            Util.creatAndStartThread(new Install(System.Threading.Thread.CurrentThread,folderName, names, this));
         }
 
         private void Tm32_Tick(object sender, EventArgs e)
@@ -382,26 +346,10 @@ namespace TAS_Installer
             Application.Exit();
         }
 
-        private void CreateShortcut(string shortcutPath, string shortcutDest)
-        {
-            StreamWriter sw = new StreamWriter(shortcutPath);
-            sw.WriteLine("[InternetShortcut]");
-            sw.WriteLine("URL=file:///" + shortcutDest);
-            sw.WriteLine("IconIndex=0");
-            sw.WriteLine("IconFile=" + shortcutDest);
-            sw.Close();
-        }
-
         private void Back2_Click(object sender, EventArgs e)
         {
             clear();
             Next_Click(sender,e);
-        }
-
-        public static Stream getStream(string s)
-        {
-            Assembly myAssembly = Assembly.GetExecutingAssembly();
-            return myAssembly.GetManifestResourceStream("TAS_Installer." + s);
         }
 
         private void DDD_Click(object sender, EventArgs e)
@@ -421,10 +369,7 @@ namespace TAS_Installer
 
         private void clear()
         {
-            foreach (Control cl in Controls)
-            {
-                cl.Visible = false;
-            }
+            this.Controls.Clear();
         }
 
         public void buttonBuild(Button next)
@@ -441,7 +386,7 @@ namespace TAS_Installer
         {
             Label labd = new Label();
             labd.SetBounds(0,0,Bounds.Width,Bounds.Height);
-            labd.Image = Image.FromStream(getStream("Resources.Back.png"));
+            labd.Image = Util.getImage(NSP + "Back.png");
             Controls.Add(labd);
 
             foreach(Control l in Controls)
@@ -471,15 +416,23 @@ namespace TAS_Installer
         {
             if (MessageBox.Show("Do you really want to cancel the setup?", "Cancel?", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes) Close();
         }
-    }
 
-    class Work
-    {
-        Work() { }
-
-        public static void DoWork()
+        public void initStep(int i)
         {
-
+            switch(i){
+                case 0:
+                    TAS_Load(null,null);
+                    break;
+                case 1:
+                    Next_Click(null, null);
+                    break;
+                case 2:
+                    Btn_Click(null, null);
+                    break;
+                case 3:
+                    Next3_Click(null,null);
+                    break;
+            }
         }
     }
 }
