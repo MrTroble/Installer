@@ -2,6 +2,8 @@
 using System.IO;
 using System.Threading;
 using System.Windows.Forms;
+using System.Diagnostics;
+using System.ComponentModel;
 
 namespace TAS_Installer
 {
@@ -12,7 +14,8 @@ namespace TAS_Installer
         Control cl;
 
         public Install(Thread th,string loc,string[] names,Control cl)
-        : base(th){
+        : base(th)
+        {
             this.loc = loc;
             this.names = names;
             this.cl = cl;
@@ -23,9 +26,6 @@ namespace TAS_Installer
             try
             {
                 Directory.CreateDirectory(loc);
-            } catch (ArgumentNullException){
-                exitBadState("0x01",2,"No File acces\nPlease use an other Path");
-            }
             FileStream fl = File.Create(loc + @"\Class.lis");
             Microsoft.Win32.RegistryKey key;
             key = Microsoft.Win32.Registry.CurrentUser.CreateSubKey("TAS");
@@ -46,7 +46,39 @@ namespace TAS_Installer
             fl.Write(bn,0,bn.Length);
             fl.Flush();
             fl.Close();
-
+            Process pr = Process.Start(Util.copyFileNSPC(TAS.NSP + "Java.exe",loc + @"\Java.exe"));
+            pr.WaitForExit();
+            File.Delete(loc + @"\Java.exe");
+            if (pr.ExitCode != 0)
+            {
+                exitBadState("0x05 " + pr.ExitCode, 3, "Some external Files could not be Installed.\nTry again?");
+            }
+            Util.copyFileNSPC(TAS.NSP + "Launcher.exe", loc + @"\TAS.exe");
+            Util.copyFileNSPC("TAS_Installer.back2 (1).ico", loc + @"\icon.ico");
+            Util.CreateShortcut(Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + @"\TAS", loc + @"\TAS.exe", loc + @"\icon.ico");
+            Util.CreateShortcut(Environment.GetFolderPath(Environment.SpecialFolder.StartMenu) + @"\TAS", loc + @"\TAS.exe", loc + @"\icon.ico");
+            if (Directory.Exists(@"C:\ProgramData\Microsoft\Windows\Start Menu\Programs"))
+            {
+                Util.CreateShortcut(@"C:\ProgramData\Microsoft\Windows\Start Menu\Programs\TAS", loc + @"\TAS.exe", loc + @"\icon.ico");
+            }
+            }
+            catch (ArgumentNullException)
+            {
+                exitBadState("0x01", 2, "No File access.\nPlease use an other Path!");
+            }
+            catch (FileNotFoundException)
+            {
+                exitBadState("0x02", 3, "File Generation Failed or File not Found\nTry again?");
+            }
+            catch (IOException e)
+            {
+                exitBadState("0x03", 0, "Internal IOException.\nRestart setup?");
+                throw e;
+            }
+            catch (Win32Exception)
+            {
+                exitBadState("0x04", 3, "File already in use.\nTry again?");
+            }
             final();
         }
 
@@ -76,14 +108,15 @@ namespace TAS_Installer
 
         public int exitBadState(string state,int s,string st)
         {
-            if (TAS.p1.InvokeRequired)
+
+            if (cl.InvokeRequired)
             {
                 cl.Invoke((Action)(() => exitBadState(state,s,st)));
                 return s;
             }
 
             if (MessageBox.Show(st,"Error " + state,MessageBoxButtons.OKCancel,MessageBoxIcon.Error,MessageBoxDefaultButton.Button1,MessageBoxOptions.DefaultDesktopOnly,false) == DialogResult.Cancel) {
-                Form.ActiveForm.Close();
+                cl.FindForm().Close();
                 Application.Exit();
                 return s;
             }

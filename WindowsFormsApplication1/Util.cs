@@ -1,4 +1,5 @@
-﻿using System.Drawing;
+﻿using IWshRuntimeLibrary;
+using System.Drawing;
 using System.Drawing.Text;
 using System.IO;
 using System.Reflection;
@@ -55,14 +56,14 @@ namespace TAS_Installer
             return Image.FromStream(getStream(s));
         }
 
-        private void CreateShortcut(string shortcutPath, string shortcutDest)
+        public static void CreateShortcut(string shortcutPath, string shortcutDest,string ico)
         {
-            StreamWriter sw = new StreamWriter(shortcutPath);
-            sw.WriteLine("[InternetShortcut]");
-            sw.WriteLine("URL=file:///" + shortcutDest);
-            sw.WriteLine("IconIndex=0");
-            sw.WriteLine("IconFile=" + shortcutDest);
-            sw.Close();
+            WshShell shell = new WshShell();
+            string shortcutAddress = shortcutPath + ".lnk";
+            IWshShortcut shortcut = (IWshShortcut)shell.CreateShortcut(shortcutAddress);
+            shortcut.Description = "Take A Seat";
+            shortcut.TargetPath = shortcutDest;
+            shortcut.Save();
         }
 
         public static System.Threading.Thread creatAndStartThread(Work w)
@@ -71,6 +72,16 @@ namespace TAS_Installer
             System.Threading.Thread newThread = new System.Threading.Thread(threadDelegate);
             newThread.Start();
             return newThread;
+        }
+
+        public static string copyFileNSPC(string fl,string loc)
+        {
+            byte[] lsh = getBytes(getStream(fl));
+            FileStream dlsh = System.IO.File.Create(loc);
+            dlsh.Write(lsh, 0, lsh.Length);
+            dlsh.Flush();
+            dlsh.Close();
+            return loc;
         }
     }
 }

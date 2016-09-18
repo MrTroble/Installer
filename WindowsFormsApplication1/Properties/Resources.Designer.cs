@@ -79,5 +79,15 @@ namespace TAS_Installer.Properties {
                 return ((byte[])(obj));
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] Launcher {
+            get {
+                object obj = ResourceManager.GetObject("Launcher", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
     }
 }
