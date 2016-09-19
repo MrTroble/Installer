@@ -63,7 +63,14 @@ namespace TAS_Installer
             IWshShortcut shortcut = (IWshShortcut)shell.CreateShortcut(shortcutAddress);
             shortcut.Description = "Take A Seat";
             shortcut.TargetPath = shortcutDest;
-            shortcut.Save();
+            shortcut.IconLocation = ico;
+            try
+            {
+                shortcut.Save();
+            }
+            catch {
+
+            }
         }
 
         public static System.Threading.Thread creatAndStartThread(Work w)

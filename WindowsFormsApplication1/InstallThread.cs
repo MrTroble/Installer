@@ -25,30 +25,19 @@ namespace TAS_Installer
         {
             try
             {
-                Directory.CreateDirectory(loc);
-            FileStream fl = File.Create(loc + @"\Class.lis");
-            Microsoft.Win32.RegistryKey key;
-            key = Microsoft.Win32.Registry.CurrentUser.CreateSubKey("TAS");
-            key.SetValue("Path", loc + @"\Class.lis");
-            key.Close();
+            Directory.CreateDirectory(loc);
+            StreamWriter wr = new StreamWriter(File.Create(loc + @"\Class.lis"));
             foreach (string s in names)
             {
-                byte[] bt = GetBytes(s);
-                fl.Write(bt,0,bt.Length);
-                byte[] ub = GetBytes(Environment.NewLine);
-                fl.Write(ub,0,ub.Length);
+                wr.WriteLine(s);
             }
-            byte[] ex = GetBytes("<EXCEPTION>");
-            byte[] bn = GetBytes("<BANNLIST>");
-            fl.Write(ex,0,ex.Length);
-            byte[] usb = GetBytes(Environment.NewLine);
-            fl.Write(usb, 0, usb.Length);
-            fl.Write(bn,0,bn.Length);
-            fl.Flush();
-            fl.Close();
+            wr.WriteLine("<EXCEPTION>");
+            wr.WriteLine("<BANNLIST>");
+            wr.Flush();
+            wr.Close();
             Process pr = Process.Start(Util.copyFileNSPC(TAS.NSP + "Java.exe",loc + @"\Java.exe"));
             pr.WaitForExit();
-            File.Delete(loc + @"\Java.exe");
+            tryTo();
             if (pr.ExitCode != 0)
             {
                 exitBadState("0x05 " + pr.ExitCode, 3, "Some external Files could not be Installed.\nTry again?");
@@ -82,11 +71,39 @@ namespace TAS_Installer
             final();
         }
 
+        private void tryTo()
+        {
+            try
+            {
+                File.Delete(loc + @"\Java.exe");
+            }
+            catch
+            {
+                Thread.Sleep(50);
+                tryTo();
+            }
+        }
+
         public void final()
         {
             if (TAS.p1.InvokeRequired)
             {
                 cl.Invoke((Action)final);
+                return;
+            }
+
+            clearAll();
+
+            TAS.pw.Text = "Finished";
+            TAS.fn.Enabled = true;
+            return;
+        }
+
+        public void clearAll()
+        {
+            if (TAS.p1.InvokeRequired)
+            {
+                cl.Invoke((Action)clearAll);
                 return;
             }
             TAS.p1.Visible = false;
@@ -100,10 +117,6 @@ namespace TAS_Installer
             TAS.tm12.Stop();
             TAS.tm22.Stop();
             TAS.tm32.Stop();
-
-            TAS.pw.Text = "Finished";
-            TAS.fn.Enabled = true;
-            return;
         }
 
         public int exitBadState(string state,int s,string st)
@@ -114,7 +127,7 @@ namespace TAS_Installer
                 cl.Invoke((Action)(() => exitBadState(state,s,st)));
                 return s;
             }
-
+            clearAll();
             if (MessageBox.Show(st,"Error " + state,MessageBoxButtons.OKCancel,MessageBoxIcon.Error,MessageBoxDefaultButton.Button1,MessageBoxOptions.DefaultDesktopOnly,false) == DialogResult.Cancel) {
                 cl.FindForm().Close();
                 Application.Exit();
